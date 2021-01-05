@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
@@ -8,14 +9,25 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rb;
     public float speed = 500f;
     public int health = 5;
+    public Text scoreText;
+    public Text healthText;
+    public Text winloseText;
+    public Image winloseBG;
 
     private int score = 0;
 
     // Update is called once per frame
     void Update() {
         if (health == 0) {
-            Debug.Log("Game Over!");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            winloseText.text = "Game Over!";
+            winloseText.color = Color.white;
+            winloseBG.color = Color.red;
+            winloseBG.gameObject.SetActive(true);
+            StartCoroutine(LoadScene(3));
+        }
+
+        if (Input.GetKey(KeyCode.Escape)) {
+            SceneManager.LoadScene("menu");
         }
     }
 
@@ -41,17 +53,34 @@ public class PlayerController : MonoBehaviour
     void OnTriggerEnter(Collider other) {
         if (other.tag == "Pickup") {
             score++;
-            Debug.Log($"Score: {score}");
+            SetScoreText();
             Object.Destroy(other.gameObject);
         }
 
         if (other.tag == "Trap") {
             health--;
-            Debug.Log($"Health: {health}");
+            SetHealthText();
         }
 
         if (other.tag == "Goal") {
-            Debug.Log("You win!");
+            winloseText.text = "You Win!";
+            winloseText.color = Color.black;
+            winloseBG.color = Color.green;
+            winloseBG.gameObject.SetActive(true);
+            StartCoroutine(LoadScene(3));
         }
+    }
+
+    void SetScoreText() {
+        scoreText.text = $"Score: {score}";
+    }
+
+    void SetHealthText() {
+        healthText.text = $"Health: {health}";
+    }
+
+    IEnumerator LoadScene(float seconds) {
+        yield return new WaitForSeconds(seconds);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
